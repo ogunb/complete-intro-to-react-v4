@@ -1,15 +1,37 @@
-import React from "react";
-import ReactDOM from "react-dom";
-import { Router, Link } from "@reach/router";
-import pf from "petfinder-client";
-import Results from "./Results";
-import Details from "./Details";
-import SearchParams from "./SearchParams";
-import { Provider } from "./SearchContext";
+/* eslint-disable react/no-unused-state */
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { Router } from '@reach/router';
+import pf from 'petfinder-client';
+import Loadable from 'react-loadable';
+import { Provider as ReduxProvider } from 'react-redux';
+import { Provider } from './SearchContext';
+import Navbar from './Navbar';
 
 const petfinder = pf({
   key: process.env.API_KEY,
-  secret: process.env.API_SECRET
+  secret: process.env.API_SECRET,
+});
+
+const GetDetails = Loadable({
+  loader: () => import('./Details'),
+  loading() {
+    return <h1>Loading...</h1>;
+  },
+});
+
+const GetSearchParams = Loadable({
+  loader: () => import('./SearchParams'),
+  loading() {
+    return <h1>Loading...</h1>;
+  },
+});
+
+const GetResults = Loadable({
+  loader: () => import('./Results'),
+  loading() {
+    return <h1>Loading...</h1>;
+  },
 });
 
 class App extends React.Component {
@@ -17,38 +39,22 @@ class App extends React.Component {
     super(props);
 
     this.state = {
-      location: "Seattle, WA",
-      animal: "",
-      breed: "",
+      location: 'Seattle, WA',
+      animal: '',
+      breed: '',
       breeds: [],
       handleAnimalChange: this.handleAnimalChange,
       handleBreedChange: this.handleBreedChange,
       handleLocationChange: this.handleLocationChange,
-      getBreeds: this.getBreeds
+      getBreeds: this.getBreeds,
     };
   }
-  handleLocationChange = event => {
-    this.setState({
-      location: event.target.value
-    });
-  };
-  handleAnimalChange = event => {
-    this.setState(
-      {
-        animal: event.target.value
-      },
-      this.getBreeds
-    );
-  };
-  handleBreedChange = event => {
-    this.setState({
-      breed: event.target.value
-    });
-  };
+
   getBreeds() {
-    if (this.state.animal) {
+    const { animal } = this.state;
+    if (animal) {
       petfinder.breed
-        .list({ animal: this.state.animal })
+        .list({ animal })
         .then(data => {
           if (
             data.petfinder &&
@@ -56,7 +62,7 @@ class App extends React.Component {
             Array.isArray(data.petfinder.breeds.breed)
           ) {
             this.setState({
-              breeds: data.petfinder.breeds.breed
+              breeds: data.petfinder.breeds.breed,
             });
           } else {
             this.setState({ breeds: [] });
@@ -65,31 +71,49 @@ class App extends React.Component {
         .catch(console.error);
     } else {
       this.setState({
-        breeds: []
+        breeds: [],
       });
     }
   }
+
+  handleLocationChange = event => {
+    this.setState({
+      location: event.target.value,
+    });
+  };
+
+  handleAnimalChange = event => {
+    this.setState(
+      {
+        animal: event.target.value,
+      },
+      this.getBreeds
+    );
+  };
+
+  handleBreedChange = event => {
+    this.setState({
+      breed: event.target.value,
+    });
+  };
+
   render() {
     return (
       <div>
-        <header>
-          <Link to="/">Adopt Me!</Link>
-          <Link to="/search-params">
-            <span aria-label="search" role="img">
-              🔍
-            </span>
-          </Link>
-        </header>
-        <Provider value={this.state}>
-          <Router>
-            <Results path="/" />
-            <Details path="/details/:id" />
-            <SearchParams path="/search-params" />
-          </Router>
-        </Provider>
+        <Navbar />
+        <Reduxprovider>
+          <Provider value={this.state}>
+            <Router>
+              <GetResults path="/" />
+              <GetDetails path="/details/:id" />
+              <GetSearchParams path="/search-params" />
+            </Router>
+          </Provider>
+        </Reduxprovider>
       </div>
     );
   }
 }
 
-ReactDOM.render(<App />, document.getElementById("root"));
+ReactDOM.render(<App />, document.getElementById('root'));
+/* eslint-disable react/no-unused-state */

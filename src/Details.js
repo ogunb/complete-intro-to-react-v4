@@ -1,27 +1,30 @@
-import React from "react";
-import pf from "petfinder-client";
-import { navigate } from "@reach/router";
-import Carousel from "./Carousel";
-import Modal from "./Modal";
+import React from 'react';
+import pf from 'petfinder-client';
+import { navigate } from '@reach/router';
+import Carousel from './Carousel';
+import Modal from './Modal';
 
 const petfinder = pf({
   key: process.env.API_KEY,
-  secret: process.env.API_SECRET
+  secret: process.env.API_SECRET,
 });
 
 class Details extends React.Component {
   state = { loading: true, showModal: false };
+
   componentDidMount() {
     petfinder.pet
       .get({
-        output: "full",
+        output: 'full',
+        // eslint-disable-next-line
         id: this.props.id
       })
       .then(data => {
         let breed;
         if (Array.isArray(data.petfinder.pet.breeds.breed)) {
-          breed = data.petfinder.pet.breeds.breed.join(", ");
+          breed = data.petfinder.pet.breeds.breed.join(', ');
         } else {
+          // eslint-disable-next-line
           breed = data.petfinder.pet.breeds.breed;
         }
         this.setState({
@@ -33,14 +36,16 @@ class Details extends React.Component {
           description: data.petfinder.pet.description,
           media: data.petfinder.pet.media,
           breed,
-          loading: false
+          loading: false,
         });
       })
       .catch(() => {
-        navigate("/");
+        navigate('/');
       });
   }
+
   toggleModal = () => this.setState({ showModal: !this.state.showModal });
+
   render() {
     if (this.state.loading) {
       return <h1>loading … </h1>;
@@ -53,7 +58,7 @@ class Details extends React.Component {
       location,
       description,
       name,
-      showModal
+      showModal,
     } = this.state;
 
     return (
